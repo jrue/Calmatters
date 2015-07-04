@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Greenhouse Gases</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css">
+    <style>
+          /* Normalize */
+        html{cursor:default;font-size:100%;overflow-y:scroll;-webkit-tap-highlight-color:transparent;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body,form,input,button,select,textarea{font-size:100%;margin:0}a,a:active,a:hover{outline:none}a:focus{outline:thin dotted}b,strong{font-weight:bold}audio[controls],canvas,video{display:inline-block;*display:inline}audio{display:none;_display:expression(this.controls ? 'inline':'none');*zoom:1}audio[controls]{display:inline-block}img{border:0;-ms-interpolation-mode:bicubic}svg:not(:root){overflow:hidden}legend{*margin-left:-7px}button,input,select,textarea{-webkit-appearance:none;border-radius:0;vertical-align:baseline;*vertical-align:middle}button,input{line-height:normal;_overflow:expression(this.type == 'button|reset|submit' ? 'visible':'')}button,input[type="button"]{overflow:visible}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}*:focus{outline:0 !important;}
+        body{
+            background: white;
+            color:black;
+            font-family:"Open Sans", sans-serif;
+        }
+        #chart{
+            overflow: hidden;
+        }
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #000;
+          /*shape-rendering: crispEdges;*/
+        }
+        .y.axis path{
+            stroke:none;
+        }
+        .y.axis line{
+            stroke-dasharray:2,2;
+            stroke-width:0.5px;
+            stroke:#aaa;
+        }
+        .y.axis .tick:first-child{
+            display: none;
+        }
+        .axis text{
+            font-size:10px;
+        }
+        .line {
+            fill: none;
+            stroke: none;
+            stroke-width: 1px;
+            shape-rendering:auto;
+        }
+
+    </style>
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+    <div id="chart"></div>
+
+    <!-- D3 js -->
+    <script src="d3.min.js" charset="utf-8"></script>
+    <script>
+
+
+        var lineChart = {
+
+            width       : 770,
+            height      : 516,
+            margin      : {top:10, right:105, bottom:20, left:55},
+
+            data        : [],
+            svg         : {},
+            g           : {},
+            lines       : d3.svg.line(),
+            area        : d3.svg.area(),
+            bars        : {},
+
+            colorScale  : d3.scale.ordinal(),
+            xScale      : d3.time.scale(),
+            yScale      : d3.scale.linear(),
+            xAxis       : d3.svg.axis().orient("bottom"),
+            yAxis       : d3.svg.axis().orient("left"),
+            parseDate   : d3.time.format("%Y").parse,
+
+            axisCreated : false,
+
+            init: function(){
+
+                //local reference to this
+                var _that = this;
+
+                //create SVG
+                this.svg = d3.select("#chart")
+                    .append("svg")
+                    .attr("class", "multi")
+                    //.attr("width", "100%")
+                    //.attr("height", "100%")
+                    .attr("width", this.width)
+                    .attr("height", this.height)
+                    .attr("preserveAspectRatio", "xMinYMin")
+                    .attr("viewBox", "0 0 " + this.width + " " + this.height);
+
+                //readjust margins for convenience
+                this.width  = this.width - this.margin.left - this.margin.right;
+                this.height = this.height - this.margin.top - this.margin.bottom;
+
+                //create grouping for chart
+                this.g = this.svg.append("g")
+                    .attr("class", "thechart")
+                    .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+                //kick things off
+                d3.json("data.json", function(error, data){
+
+                    //sort data initally 
+                    data.sort(function(a,b){ return b.values[6].value - a.values[6].value; })
+
+                    //make a global copy of the data
+                    _that.data = data.slice();
+
+                    //apply d3 stack to all data hierarchy
+                    _that.stackData();
+
+                    //now start building the chart
+                    _that.setScales(data);
+
+                });
+            },
+
+            redrawGraph: function(data){
+
+                var _that = this;
+
+                //generate zero-value stack-formatted array
+                var zero = d3.range(2000, 2014).map(function(d){ return {y:0, y0:0, year: _that.parseDate(String(d))}; });
+
+                d3.selectAll(".line")
+                    // .attr("d", function(d){ return _that.area(zero)})
+                    .data(data)
+                    .exit()
+                    .remove();
+
+                d3.selectAll(".line")
+                    .transition()
+                    .duration(400)
+                    .attr("d", function(d){ return _that.area(d.values); })
+                    
+                this.drawLegend(data);
+            },
+
+
+            drawGraph: function(){
+
+                var _that = this;
+
+                this.bars = this.g.selectAll("path")
+                    .data(this.data)
+                    .enter();
+
+                this.bars.append("path")
+                    .attr("class", "line")
+                    .attr("d", function(d){ return _that.area(d.values) })
+                    .style("fill", function(d){ return _that.colorScale(d.key); })
+                    .style({"opacity": 1})
+                    .on("mouseover", function(d){
+                        if(d.hasOwnProperty("children")){
+                            d3.select(this)
+                                .style({"opacity":0.7, "cursor":"pointer"})
+                        }
+                    })
+                    .on("mouseout", function(d){
+                        d3.select(this)
+                            .style({"opacity": 1, "cursor":"default"});
+                    })
+                    .on("click", function(d){
+                        if(d.hasOwnProperty("children")){
+                            _that.setScales(d.children);
+                        }
+                        
+                    })
+
+                this.drawLegend(this.data);
+
+            },
+
+            drawLegend: function(data){
+
+                var _that = this;
+
+                var boxes = [];
+
+                this.g.selectAll(".label")
+                    .remove();
+
+                this.g.selectAll(".label")
+                    .data(data)
+                    .enter()
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("transform", function(d, i){
+                        var space = _that.height - _that.yScale(d.values[d.values.length - 1].y);
+
+                        var t = "translate(" + (_that.width - 20) + "," + (_that.yScale(d.values[d.values.length - 1].y0 + (d.values[d.values.length - 1].y/2) ) + 5) + ")";
+                        if(space < 18){
+                            boxes.push({key:d.key.substr(0,4), x:(_that.width - 30), y:((_that.data.length - i) * 20), color:_that.colorScale(d.key)});
+                            t = "translate(" + (_that.width - 30) +"," + ((_that.data.length - i) * 20) + ")";
+
+                        } 
+                        return t;
+
+                    })
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .text(function(d){ return d.key; })
+                    .style({"font":"11px sans-serif", "text-anchor":"end", "fill":"black", "pointer-events":"none"});
+
+
+                this.g.selectAll(".legendbox")
+                    .remove();
+
+                this.g.selectAll(".legendbox")
+                    .data(boxes)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "legendbox")
+                    .attr("id", function(d){ return d.key; })
+                    .attr("x", function(d){ return d.x + 4; })
+                    .attr("y", function(d){ return d.y - 8; })
+                    .attr("width", 10)
+                    .attr("height", 10)
+                    .attr("fill", function(d){ return d.color; })
+   
+            },
+
+
+            transitionAxes: function(data){
+
+                d3.selectAll(".y.axis")
+                    .transition()
+                    .duration(800)
+                    .call(this.yAxis);
+
+                this.redrawGraph(data);
+            },
+
+            createAxes: function(){
+
+                this.axisCreated = true;
+
+                this.xAxis.scale(this.xScale);
+
+                this.yAxis
+                    .scale(this.yScale)
+                    .tickSize(this.width);
+
+                this.svg.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + (this.width + this.margin.left) + "," + this.margin.top + ")")
+                    .call(this.yAxis)
+                    .append("text")
+                    .attr("class", "yaxislabel")
+                    .attr("transform", "translate(" + (-this.width - 30) + "," + (this.height/2) + ")rotate(-90)")
+                    .style({"font":"10px sans-serif", "text-anchor":"middle"})
+                    .text("Million tonnes of CO2 equivalent");
+
+                this.svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(" + this.margin.left + "," + (this.height + this.margin.top) + ")")
+                    .call(this.xAxis)
+                    .selectAll("text")
+                    .attr("text-anchor", "middle");
+
+                this.drawGraph();
+            },
+
+            setScales: function(data){
+
+                var _that = this;
+
+                //go through data finding max value
+                var max = d3.round(d3.max(data, function(d){
+                    return d3.max(d.values, function(j){ return j.y0 + j.y; });
+                }), -1);
+
+
+                this.xScale
+                    .domain([this.parseDate("2000"), this.parseDate("2013")])
+                    .range([0, this.width]);
+
+                this.yScale
+                    .domain([0, max + 100])
+                    .range([this.height, 0]);
+
+                this.area
+                    .interpolate("linear")
+                    .x(function(d){ return _that.xScale(d.year); })
+                    .y0(function(d){ return _that.yScale(d.y0); })
+                    .y1(function(d){ return _that.yScale(d.y0 + d.y); });
+
+                this.colorScale
+                    .range(["#3a81c2", "#db2427", "#f58930", "#8aaf5d", "#eacb3d", "#e0535a", "#53860f"])
+                    .domain(data.map(function(d){ return d.key; }))
+
+
+                //if the axes have been created, just animate the new values
+                this.axisCreated ? this.transitionAxes(data) : this.createAxes();
+                
+            },
+
+            stackData: function(){
+
+                var _that = this;
+
+                var stack = d3.layout.stack()
+                    .offset("zero")
+                    .values(function(d){ return d.values; });
+
+                this.data.forEach(function(d){
+                    if(d.hasOwnProperty("children")){
+                        d.children.forEach(function(k){
+                            if(k.hasOwnProperty("children")){
+                                k.children.forEach(function(j){
+                                    j.values = j.values.map(function(l){ return {"year": _that.parseDate(String(l.year)), "y": l.value}});
+                                })
+                                k.children = stack(k.children);
+                            }
+                            k.values = k.values.map(function(h){ return {"year": _that.parseDate(String(h.year)), "y": h.value}});
+                        })
+                        d.children = stack(d.children);
+                    }
+                    d.values = d.values.map(function(g){ return {"year": _that.parseDate(String(g.year)), "y": g.value}});
+                });
+                this.data = stack(this.data);
+
+            }
+
+        }
+
+        lineChart.init();
+
+
+
+
+    </script>
+</body>
+ </html>
