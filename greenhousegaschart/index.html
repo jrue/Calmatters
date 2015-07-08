@@ -236,7 +236,7 @@
                   .attr("class", "credit")
                   .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top + this.height + this.margin.bottom - 5) + ")") 
                   .append("text")
-                  .text("California EPA Air Resources Board July 2015, (based upon IPCC Fourth Assessement Report's Global Warming Potentials) Graphic by Jeremy Rue for CalMatters.")
+                  .text("California Air Resources Board; California Department of Finance; US Bureau of Economic Analysis. Graphic by Jeremy Rue for CalMatters.")
                   .style({"font":"8px sans-serif", "fill":"#767676"});
 
                 //headline
@@ -399,7 +399,8 @@
                     .attr("cx", function(d){ return _that.xScale(d.year); })
                     .attr("cy", function(d){ return _that.yScale(d.population); })
                     .attr("r", 4)
-                    .style({"stroke":"#593837", "fill":"#fff","fill-opacity":0, "stroke-width":"1px", "cursor":"pointer"})
+                    //.style({"stroke":"#593837", "fill":"#fff","fill-opacity":0, "stroke-width":"1px", "cursor":"pointer"})
+                    .style({"stroke":"none", "fill":"#593837","fill-opacity":1, "stroke-width":"1px", "cursor":"pointer"})
                     .on("mouseover", function(d){
                         
                         window.clearTimeout(window.timeout);
@@ -439,7 +440,8 @@
                     .attr("cx", function(d){ return _that.xScale(d.year); })
                     .attr("cy", function(d){ return _that.yScale(d.greenhouse); })
                     .attr("r", 4)
-                    .style({"stroke":"#211A6E", "fill":"#fff","fill-opacity":0, "stroke-width":"1px", "cursor":"pointer"})
+                    //.style({"stroke":"#211A6E", "fill":"#fff","fill-opacity":0, "stroke-width":"1px", "cursor":"pointer"})
+                    .style({"stroke":"none", "fill":"#211A6E","fill-opacity":1, "stroke-width":"1px", "cursor":"pointer"})
                     .on("mouseover", function(d){
                         
                         window.clearTimeout(window.timeout);
@@ -536,15 +538,15 @@
                     .attr("y", 5)
                     .attr("width", 130)
                     .attr("height", 30)
-                    .style({"fill":"#fff", "stroke-width":"1px", "cursor":"pointer"})
+                    .style({"fill":"#bbb", "stroke-width":"1px", "cursor":"pointer"})
                     .style("stroke", "#777")
                     .on("mouseover", function(){
                         d3.select(this)
-                            .style("fill", "#ccc");
+                            .style({"fill":"#777"});
                     })
                     .on("mouseout", function(){
                         d3.select(this)
-                            .style("fill", "#fff");
+                            .style("fill", "#bbb");
                     })
                     .on("click", function(){
                         if(!_that.projection){
@@ -572,9 +574,9 @@
                     .style("opacity", 1);
 
                 var legends = [
-                    {name: "Greenhouse Gases", x:.05, color:"#211A6E"},
-                    {name: "Population", x:.26, color:"#942911"},
-                    {name: "GDP percent from previous year", x:.40, color:"#DC9C89"}
+                    {name: "Greenhouse Gas Emissions", x:.02, color:"#211A6E"},
+                    {name: "Population", x:.31, color:"#942911"},
+                    {name: "Economic Growth", x:.44, color:"#DC9C89"}
                 ];
 
                 var legend = this.svg.append("g")
