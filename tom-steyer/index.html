@@ -11,7 +11,7 @@
       /* Normalize */
       html{cursor:default;font-size:100%;overflow-y:scroll;-webkit-tap-highlight-color:transparent;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body,form,input,button,select,textarea{font-size:100%;margin:0}a,a:active,a:hover{outline:none}a:focus{outline:thin dotted}b,strong{font-weight:bold}audio[controls],canvas,video{display:inline-block;*display:inline}audio{display:none;_display:expression(this.controls ? 'inline':'none');*zoom:1}audio[controls]{display:inline-block}img{border:0;-ms-interpolation-mode:bicubic}svg:not(:root){overflow:hidden}legend{*margin-left:-7px}button,input,select,textarea{-webkit-appearance:none;border-radius:0;vertical-align:baseline;*vertical-align:middle}button,input{line-height:normal;_overflow:expression(this.type == 'button|reset|submit' ? 'visible':'')}button,input[type="button"]{overflow:visible}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}*:focus{outline:0 !important;}
       body{
-          background: white;
+          background: black;
           color:black;
           font-family:"Open Sans", sans-serif;
       }
@@ -20,9 +20,10 @@
       }
       #chart{
         position: relative;
-        overflow:hidden;
+        overflow:visible;
         width:100%;
         height:100%;
+        background: white;
       }
       #title{
         position:absolute;
@@ -130,6 +131,50 @@
       .dark{
           fill:#000;
       }
+      #tooltip{
+            position: absolute;
+            top:0px;
+            left:0px;
+            font:400 14px/16px sans-serif;
+            -webkit-transform:translate(-50%, -125%);
+                    transform:translate(-50%, -125%);
+            max-width: 200px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #333;
+            z-index: 9999;
+            pointer-events:none;
+            opacity: 0;
+            box-shadow: 0px 0px 5px 0px #ccc;
+        }
+        #tooltip:after{
+            top:100%;
+            left:50%;
+            border:solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            border-top-color:black;
+            pointer-events:none;
+            border-width: 9px;
+            margin-left:-9px;
+        }
+        #tooltip:before{
+            top:100%;
+            left:50%;
+            border:solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            z-index: 99999;
+            border-top-color:white;
+            pointer-events:none;
+            border-width: 9px;
+            margin-top: -1px;
+            margin-left:-9px;
+        }
 
     </style>
     <!--[if lt IE 9]>
@@ -139,6 +184,7 @@
   </head>
   <body>
     <div id="chart">
+        <div id="tooltip"></div>
         <div id="title">
             <div id="detail">
                 <h1>A closer look at Tom Steyer's political spending in California</h1>
@@ -161,7 +207,7 @@
         {"name":"Assembly Democrats voter outreach","type":"org", "sum":300000,"outcome":"n/a","year":2014,"id":7},
         {"name":"Consumer Watchdog (precursor to Prop 45)","type":"prop", "sum":200000,"outcome":"Lose","year":2012,"id":8},
         {"name":"Californians for Fair Election Reform","type":"org", "sum":174317,"outcome":"Win","year":2007,"id":9},
-        {"name":"Opposing Steve Glazer for Senate","type":"person", "sum":150000,"outcome":"Lose","year":2015,"id":10},
+        {"name":"Opposing Steve Glazer","type":"person", "sum":150000,"outcome":"Lose","year":2015,"id":10},
         {"name":"California Labor Federation political committee","type":"org", "sum":100000,"outcome":"n/a","year":2008,"id":11},
         {"name":"Yes on Propositions 1 and 2","type":"prop", "sum":50000,"outcome":"Win","year":2014,"id":12},
         {"name":"Richard Riordan for Governor","type":"person", "sum":50000,"outcome":"Lose","year":2001,"id":13},
@@ -178,11 +224,11 @@
     ];
         
     var nextGenData = [
-        {"session": "5th Quarter 2013-2014", amount: 6000, "bills":"AB 2420, SB 1017 1132"},
-        {"session": "6th Quarter 2013-2014", amount: 36000, "bills":"AB 69, 2420; SB 1017, 861, 1132, 1281, 1319; State Budget; Legislature: gas extraction policy, oil severance tax; Governor: AB 32 and oil fee/oil spill prevention issues; Legislative Counsel: 2/3 voter approval requirement for fracking"},
-        {"session": "7th Quarter 2013-2014", amount: 36000, "bills":"AB 69; Legislature: gas extraction policy, oil severance tax, cap and trade"},
-        {"session": "8th Quarter 2013-2014", amount: 36000, "bills":"Legislature: energy, environment, oil extraction policy, oil severance tax; Governor: oil extraction policy, oil severance tax"},
-        {"session": "1st Quarter 2015-2016", amount: 30000, "bills":"AB 645, 692; SB 32, 180, 350; Legislature, Governor: oil extraction policy; Air Resources Board: sustainable freight strategy, low carbon fuels standard"},
+        {"session": "2013-2014 (Q5)", amount: 6000,  "bills":["AB 2420", "SB 1017", "SB 1132"]},
+        {"session": "2013-2014 (Q6)", amount: 36000, "bills":["AB 69", "AB 2420", "SB 1017", "SB 861", "SB 1132", "SB 1281", "SB 1319", "State Budget", "Legislature: gas extraction policy, oil severance tax", "Governor: AB 32 and oil fee/oil spill prevention issues", "Legislative Counsel: 2/3 voter approval requirement for fracking"]},
+        {"session": "2013-2014 (Q7)", amount: 36000, "bills":["AB 69", "Legislature: gas extraction policy", "oil severance tax", "cap and trade"]},
+        {"session": "2013-2014 (Q8)", amount: 36000, "bills":["Legislature: energy, environment, oil extraction policy, oil severance tax", "Governor: oil extraction policy oil severance tax"]},
+        {"session": "2015-2016 (Q1)", amount: 30000, "bills":["AB 645", "AB 692", "SB 32", "SB 180", "SB 350", "Legislature", "Governor: oil extraction policy", "Air Resources Board: sustainable freight strategy, low carbon fuels standard"]},
     ];
 
     
@@ -228,7 +274,7 @@
             //create SVG
             this.svg = d3.select("#chart")
                 .append("svg")
-                .attr("width", "1000px")
+                .attr("width", "100%")
                 .attr("height", "100%")
                 .attr("preserveAspectRatio", "xMinYMin")
                 .attr("viewBox", "0 0 " + this.width + " " + this.height);
@@ -313,6 +359,13 @@
                     });
               });
             
+            this.svg.append("g")
+              .attr("class", "credit")
+              .attr("transform", "translate(5," + (this.margin.top + this.height + this.margin.bottom - 5) + ")") 
+              .append("text")
+              .text("Campaign Finance Data California Secretary of State 2015. Graphic by Jeremy Rue for CalMatters.")
+              .style({"font":"8px sans-serif", "fill":"#767676"});
+
 
 
         },
@@ -332,7 +385,35 @@
                 .attr("width", function(d){ return _that.xScale.rangeBand(); })
                 .attr("height", function(d){ return _that.height - _that.powerScale(d.sum); })
                 .style("fill", function(d){ return "#5e959a";/* _that.colorScale(d.sum); */ })
-                .attr("class", "bars");
+                .attr("class", "bars")
+                .on("mouseover", function(d, i){
+
+                    var h = _that.svg.node().getBoundingClientRect().height,
+                        w = _that.svg.node().getBoundingClientRect().width,
+                        wOffset = w/(_that.width + _that.margin.left + _that.margin.right),
+                        hOffset = h/(_that.height + _that.margin.top + _that.margin.bottom);
+
+                    var rect = d3.select(this).node().getBBox();
+
+                    d3.select(this)
+                        .style({"opacity":0.7, "cursor":"pointer"});
+
+
+                    d3.select("#tooltip")
+                      .style({"opacity":1, "top": (_that.margin.top + (rect.y + (rect.height/2)) * hOffset) + "px", "left": (_that.margin.left + (rect.x + (rect.width/2)) * wOffset) + "px" })
+                      .html("<strong>" + d.name + "</strong><br><br><strong>Sum:</strong> " + d3.format("$,2")(d.sum) + "<br><strong>Outcome: </strong>" + d.outcome);
+                    
+                })
+                .on("mouseout", function(d, i){
+                
+                    d3.select(this)
+                        .style("opacity", 1);
+
+                    d3.select("#tooltip")
+                        .style("opacity", 0);
+
+                    
+                });
 
             this.addBubbleText();
 
@@ -384,7 +465,7 @@
                 .call(this.xAxis)
                 .selectAll("text")
                 .style({"text-anchor":"start"})
-                .attr("transform", "translate(-10,3)rotate(40)")
+                .attr("transform", "translate(-10,3)rotate(45)")
                 .attr("y", -3)
                 .attr("x", 10);
 
@@ -440,7 +521,7 @@
                 .style({"text-anchor":"start"})
                 .attr("transform", function(d){ 
                     //var s = d3.select(this).attr("transform") || ""; 
-                    return "translate(-10,3)rotate(40)"; 
+                    return "translate(-10,3)rotate(45)"; 
                 })
                 .attr("y", -3)
                 .attr("x", 10);
@@ -500,14 +581,15 @@
                 .attr("r", 10)
                 .style({"fill":"#aaa", "cursor":"pointer"})
                 .on("click", function(d, i){
-                    _that.currentStep++; 
+
+                    _that.currentStep == _that.stepFunctions.length - 1 ? _that.currentStep = 0 : _that.currentStep++; 
                     _that.stepFunctions[_that.currentStep].call(_that);
                     _that.setNavActive();
                 });
             
             
             nav.append("text")
-                .attr("x", this.stepFunctions.length * 22.5)
+                .attr("x", this.stepFunctions.length * 23)
                 .attr("y", 22)
                 .attr("text-anchor", "start")
                 .html("&#65515;")
@@ -524,13 +606,6 @@
             
             d3.selectAll(".navigation circle")
                 .style("fill", "#aaa");
-//                .each(function(d, i){
-//                                
-//                    if(i <= _that.currentStep){
-//                        d3.select(this).style("fill", "#423c43");
-//                    }
-//                    
-//                })
             
             d3.select(".navigation circle:nth-child(" + (_that.currentStep + 1) + ")")
                 .style("fill", "#423c43");
@@ -765,9 +840,18 @@
                 nextGenXScale = d3.scale.ordinal(),
                 nextGenYAxis  = d3.svg.axis(),
                 nextGenXAxis  = d3.svg.axis();
+
+            nextGenData.forEach(function(d){
+              var size = 0;
+              d.bills.forEach(function(d){
+                size += d.length;
+              });
+              d.size = size;
+            });
+
             
             nextGenYScale.domain([0, d3.max(nextGenData, function(d){ return d.amount})])
-                .range([this.height, this.height * .5]);
+                .range([this.height, this.height * .4]);
             
             nextGenXScale.domain(nextGenData.map(function(d){ return d.session; }))
                 .rangeRoundBands([0, this.width], .1);
@@ -793,23 +877,36 @@
                 .attr("width", function(d){ return nextGenXScale.rangeBand(); })
                 .attr("y", this.height)
                 .attr("height", 0)
-                .style({"fill":"#555", "cursor":"pointer"})
+                .style({"fill":"#395E5E", "cursor":"pointer"})
                 .on("mouseover", function(d, i){
-                
+
+                    var h = _that.svg.node().getBoundingClientRect().height,
+                        w = _that.svg.node().getBoundingClientRect().width,
+                        wOffset = w/(_that.width + _that.margin.left + _that.margin.right),
+                        hOffset = h/(_that.height + _that.margin.top + _that.margin.bottom);
+
                     d3.select(this)
-                        .style("fill", "#999");
+                        .style("fill", "#609F9F");
+
+                    d3.select("#tooltip")
+                      .style({"opacity":1, "top": ((nextGenYScale(d.amount) + 50) * hOffset) + "px", "left": ((_that.margin.left + nextGenXScale(d.session) + (nextGenXScale.rangeBand()/2)) * wOffset) + "px" })
+                      .html("<strong>BILLS/AGENCIES LOBBIED</strong><br><br>" + d.bills.join(", "));
                     
                 })
                 .on("mouseout", function(d, i){
                 
                     d3.select(this)
-                        .style("fill", "#555");
+                        .style("fill", "#395E5E");
+
+                    d3.select("#tooltip")
+                        .style("opacity", 0);
+
                     
                 })
                 .transition()
                 .duration(800)
                 .attr("y", function(d){ return nextGenYScale(d.amount); })
-                .attr("height", function(d){ return _that.height - nextGenYScale(d.amount); })
+                .attr("height", function(d){ return _that.height - nextGenYScale(d.amount); });
             
             nextGen.append("text")
                 .style({"font":"10px sans-serif", "font-size":"12px", "pointer-events":"none"})
@@ -832,17 +929,16 @@
                 .attr("class", "nextgenx")
                 .call(nextGenXAxis)
                 .selectAll("text")
-                .attr("text-anchor", "start")
-                .attr("transform", "rotate(45)");
+                .attr("text-anchor", "middle")
+                .style({"font":"11px sans-serif"})
+                //.attr("transform", "rotate(45)");
             
             
-            var text = ["Also last year, Steyer's nonprofit organization began lobbying the California ",
-                        "Legislature. ",
+            var text = ["Also last year, Steyer's nonprofit organization began lobbying the California Legislature. ",
                         " ",
-                        "NextGen Climate Action registered to lobby in California in 2014 ",
-                        "and now has contracts with three Sacramento lobbying firms. It's urging lawmakers ",
-                        "to pass a package of climate-change related bills championed by Steyer's friend, ",
-                        "Senate leader Kevin de Leon."];
+                        "NextGen Climate Action registered to lobby in California in 2014 and now has contracts with", 
+                        "three Sacramento lobbying firms. It's urging lawmakers to pass a package of climate-change ",
+                        "related bills championed by Steyer's friend, Senate leader Kevin de Leon."];
 
             
             var notations = this.svg.insert("g", ".thechart")
@@ -851,7 +947,7 @@
                 .style("pointer-events", "none");
             
             notations.append("text")
-                .attr("x", this.width * .25)
+                .attr("x", this.width * .05)
                 .attr("y", 50)
                 .call(function(d){
                
