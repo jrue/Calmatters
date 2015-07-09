@@ -187,8 +187,8 @@
         <div id="tooltip"></div>
         <div id="title">
             <div id="detail">
-                <h1>A closer look at Tom Steyer's political spending in California</h1>
-                <p>With a net worth of $1.6 billion, former hedge fund manager Tom Steyer has given generously to environmental and political causes around the country. This interactive feature takes a closer look at the political contributions he's made in his home state of California.</p>
+                <h1>Tom Steyer's political spending in California</h1>
+                <p>With a net worth of $1.6 billion, former hedge fund manager Tom Steyer has spent generously on Democratic campaigns around the country. This interactive feature takes a closer look at his political activity in his home state of California.</p>
                 <button id="next">Begin</button>
             </div>
         </div>
@@ -198,10 +198,10 @@
     <script src="d3.min.js" charset="utf-8"></script>
     <script>
     var data = [
-        {"name":"Yes on Proposition 39*","type":"prop", "sum":29580000,"outcome":"Win","year":2012,"id":1},
-        {"name":"No on Proposition 23*","type":"prop", "sum":5049000,"outcome":"Win","year":2010,"id":2},
+        {"name":"Yes on Proposition 39","type":"prop", "sum":29580000,"outcome":"Win","year":2012,"id":1},
+        {"name":"No on Proposition 23","type":"prop", "sum":5049000,"outcome":"Win","year":2010,"id":2},
         {"name":"California Democratic Party","type":"org", "sum":1245000,"outcome":"n/a","year":2010,"id":3},
-        {"name":"Senate Democrats voter outreach","type":"prop", "sum":1000000,"outcome":"n/a","year":2014,"id":4},
+        {"name":"Senate Democrats voter outreach","type":"org", "sum":1000000,"outcome":"n/a","year":2014,"id":4},
         {"name":"No on Proposition 26","type":"prop", "sum":1000000,"outcome":"Lose","year":2010,"id":5},
         {"name":"No on Proposition 32","type":"prop", "sum":500000,"outcome":"Win","year":2012,"id":6},
         {"name":"Assembly Democrats voter outreach","type":"org", "sum":300000,"outcome":"n/a","year":2014,"id":7},
@@ -213,22 +213,22 @@
         {"name":"Richard Riordan for Governor","type":"person", "sum":50000,"outcome":"Lose","year":2001,"id":13},
         {"name":"Gov. Jerry Brown re-election","type":"person", "sum":27200,"outcome":"Win","year":2014,"id":14},
         {"name":"Yes on Proposition 2","type":"prop", "sum":25000,"outcome":"Win","year":2008,"id":15},
-        {"name":"Leadership California/Don Perata","type":"person", "sum":20000,"outcome":"n/a","year":2007,"id":16},
+        {"name":"Leadership California/Don Perata","type":"org", "sum":20000,"outcome":"n/a","year":2007,"id":16},
         {"name":"Betty Yee for Controller","type":"person", "sum":13600,"outcome":"Win","year":2014,"id":17},
         {"name":"Antonio Villaraigosa for LA mayor","type":"person", "sum":7000,"outcome":"Lose","year":2001,"id":18},
         {"name":"Noreen Evans for Assembly","type":"person", "sum":3600,"outcome":"Win","year":2008,"id":19},
         {"name":"Janet Reilly for Assembly","type":"person", "sum":3300,"outcome":"Lose","year":2006,"id":20},
         {"name":"Phil Polakoff for Assembly","type":"person", "sum":3000,"outcome":"Lose","year":2008,"id":21},
         {"name":"Dem CCC","type":"org", "sum":521,"outcome":"n/a","year":2002,"id":22},
-        {"name":"Kamala Harris Att.","type":"person", "sum":500,"outcome":"Win","year":2010,"id":23}
+        {"name":"Kamala Harris for Atty. General","type":"person", "sum":500,"outcome":"Win","year":2010,"id":23}
     ];
         
     var nextGenData = [
-        {"session": "2013-2014 (Q5)", amount: 6000,  "bills":["AB 2420", "SB 1017", "SB 1132"]},
-        {"session": "2013-2014 (Q6)", amount: 36000, "bills":["AB 69", "AB 2420", "SB 1017", "SB 861", "SB 1132", "SB 1281", "SB 1319", "State Budget", "Legislature: gas extraction policy, oil severance tax", "Governor: AB 32 and oil fee/oil spill prevention issues", "Legislative Counsel: 2/3 voter approval requirement for fracking"]},
-        {"session": "2013-2014 (Q7)", amount: 36000, "bills":["AB 69", "Legislature: gas extraction policy", "oil severance tax", "cap and trade"]},
-        {"session": "2013-2014 (Q8)", amount: 36000, "bills":["Legislature: energy, environment, oil extraction policy, oil severance tax", "Governor: oil extraction policy oil severance tax"]},
-        {"session": "2015-2016 (Q1)", amount: 30000, "bills":["AB 645", "AB 692", "SB 32", "SB 180", "SB 350", "Legislature", "Governor: oil extraction policy", "Air Resources Board: sustainable freight strategy, low carbon fuels standard"]},
+        {"session": "2014 (Q1)", amount: 6000,  "bills":["AB 2420", "SB 1017", "SB 1132"]},
+        {"session": "2014 (Q2)", amount: 36000, "bills":["AB 69", "AB 2420", "SB 1017", "SB 861", "SB 1132", "SB 1281", "SB 1319", "State Budget", "Legislature: gas extraction policy, oil severance tax", "Governor: AB 32 and oil fee/oil spill prevention issues", "Legislative Counsel: 2/3 voter approval requirement for fracking"]},
+        {"session": "2014 (Q3)", amount: 36000, "bills":["AB 69", "Legislature: gas extraction policy", "oil severance tax", "cap and trade"]},
+        {"session": "2014 (Q4)", amount: 36000, "bills":["Legislature: energy, environment, oil extraction policy, oil severance tax", "Governor: oil extraction policy oil severance tax"]},
+        {"session": "2015 (Q1)", amount: 30000, "bills":["AB 645", "AB 692", "SB 32", "SB 180", "SB 350", "Legislature", "Governor: oil extraction policy", "Air Resources Board: sustainable freight strategy, low carbon fuels standard"]},
     ];
 
     
@@ -306,7 +306,7 @@
             
             //ordinal scale by year
             this.typeScale
-                .range(["#395e5e", "#71785C",  "#6D5C5A"])
+                .range(["#5C9C9C", "#949D7A",  "#9C8380"])
                 .domain(["Proposition", "Organization", "Candidate"]);
 
             
@@ -363,7 +363,7 @@
               .attr("class", "credit")
               .attr("transform", "translate(5," + (this.margin.top + this.height + this.margin.bottom - 5) + ")") 
               .append("text")
-              .text("Campaign Finance Data California Secretary of State 2015. Graphic by Jeremy Rue for CalMatters.")
+              .text("Campaign Finance Data California Secretary of State 2015. Graphic by Jeremy Rue for CALMatters.")
               .style({"font":"8px sans-serif", "fill":"#767676"});
 
 
@@ -400,7 +400,7 @@
 
 
                     d3.select("#tooltip")
-                      .style({"opacity":1, "top": (_that.margin.top + (rect.y + (rect.height/2)) * hOffset) + "px", "left": (_that.margin.left + (rect.x + (rect.width/2)) * wOffset) + "px" })
+                      .style({"opacity":1, "top": (_that.margin.top + (rect.y + (rect.height/2)) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
                       .html("<strong>" + d.name + "</strong><br><br><strong>Sum:</strong> " + d3.format("$,2")(d.sum) + "<br><strong>Outcome: </strong>" + d.outcome);
                     
                 })
@@ -465,7 +465,7 @@
                 .call(this.xAxis)
                 .selectAll("text")
                 .style({"text-anchor":"start"})
-                .attr("transform", "translate(-10,3)rotate(45)")
+                .attr("transform", "translate(-10,3)rotate(48)")
                 .attr("y", -3)
                 .attr("x", 10);
 
@@ -521,7 +521,7 @@
                 .style({"text-anchor":"start"})
                 .attr("transform", function(d){ 
                     //var s = d3.select(this).attr("transform") || ""; 
-                    return "translate(-10,3)rotate(45)"; 
+                    return "translate(-10,3)rotate(48)"; 
                 })
                 .attr("y", -3)
                 .attr("x", 10);
@@ -634,18 +634,18 @@
            this.xScale.domain(this.data.sort(function(a,b){return a.id - b.id; }).map(function(d){ return d.name; }));
            this.redrawGraph(function(d){ return d3.format(">-$.0f")(d/1e6) + " mil"; }, function(d){ return d.sum > 2000000 ? "#2c3b3d" : "#5e959a"; }, 20); 
             
-           var text = ["The bulk of Steyer's political spending in California went to efforts related ",
+           var text = ["The bulk of Steyer's political spending in California has gone to to efforts related ",
                        "to his fight against climate change — supporting Proposition 39 and opposing ",
                        "Proposition 23.",
                        " ",
                        "Proposition 39 raised taxes on out-of-state companies doing business in California ",
                        "and devoted the money to making energy efficiency upgrades in public schools. ",
-                       "Steyer and California Sen. Kevin de Leon led the campaign for Proposition 39, which ",
+                       "Steyer and California Sen. Kevin de León led the campaign for Proposition 39, which ",
                        "voters approved in 2012.",
                        " ",
-                       "Proposition 23 was paid for by oil companies that are subject to a cap and trade ",
-                       "system by California's landmark climate-change law, AB 32. The measure would have ",
-                       "suspended AB 32, but voters rejected it in 2010."];
+                       "Proposition 23 was paid for largely by oil companies that are supposed to cut their ",
+                       "greenhouse gas emissions under California's landmark climate-change law, AB 32. The ",
+                       "measure would have suspended AB 32, but voters rejected it in 2010."];
             
             
             
@@ -656,7 +656,7 @@
                 .style("pointer-events", "none");
             
            notations.append("path")
-                .attr("d", "M" + this.xScale.rangeBand() + "," + (this.height * .25) + " h100 M" + (this.xScale.rangeBand()*2) + "," + (this.height * .85) + "h140 v-" + (this.height * .15))
+                .attr("d", "M" + this.xScale.rangeBand() + "," + (this.height * .42) + " h100 M" + (this.xScale.rangeBand()*2) + "," + (this.height * .85) + "h140 v-" + (this.height * .15))
                 .style({"stroke":"#000", "stroke-width":"1px", "stroke-dasharray":"2,2", "fill":"none"});
           
            notations.append("text")
@@ -938,7 +938,7 @@
                         " ",
                         "NextGen Climate Action registered to lobby in California in 2014 and now has contracts with", 
                         "three Sacramento lobbying firms. It's urging lawmakers to pass a package of climate-change ",
-                        "related bills championed by Steyer's friend, Senate leader Kevin de Leon."];
+                        "related bills championed by Senate leader Kevin de León."];
 
             
             var notations = this.svg.insert("g", ".thechart")
