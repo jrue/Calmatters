@@ -423,7 +423,7 @@
 
                     d3.select("#tooltip")
                       .style({"opacity":1, "top": (_that.margin.top + (rect.y + (rect.height/2)) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
-                      .html("<strong>" + d.name + "</strong><br><br><strong>Sum:</strong> " + d3.format("$,2")(d.sum) + "<br><strong>Outcome: </strong>" + d.outcome)
+                      .html("<strong>" + d.name + "</strong><br><br><strong>Sum:</strong> " + d3.format("$,2")(d.sum) + "<br>")
                       .classed("left", function(){ return data.indexOf(d) < 5 ? true : false; })
                       .classed("right", function(){ return data.indexOf(d) > 13 ? true : false; });
                     
