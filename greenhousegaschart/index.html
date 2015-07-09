@@ -107,6 +107,26 @@
             margin-top: -1px;
             margin-left:-9px;
         }
+        #tooltip.left{
+            -webkit-transform:translate(-20%, -125%);
+                    transform:translate(-20%, -125%);
+        }
+        #tooltip.left:before{
+            left:20%;
+        }
+        #tooltip.left:after{
+            left:20%;
+        }
+        #tooltip.right{
+            -webkit-transform:translate(-80%, -125%);
+                    transform:translate(-80%, -125%);
+        }
+        #tooltip.right:before{
+            left:80%;
+        }
+        #tooltip.right:after{
+            left:80%;
+        }
 
     </style>
     <!--[if lt IE 9]>
@@ -149,7 +169,7 @@
             bars        : {},
             dots        : {},
             navigation  : {},
-            projection  : false,
+            projection  : true,
 
             colorScale  : d3.scale.ordinal(),
             xScale      : d3.time.scale(),
@@ -227,7 +247,7 @@
                         //_that.stackData();
 
                         //now start building the chart
-                        _that.setScales(_that.pop, _that.parseDate("2013"));
+                        _that.setScales(_that.pop, _that.parseDate("2030"));
 
                 });
 
@@ -236,7 +256,7 @@
                   .attr("class", "credit")
                   .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top + this.height + this.margin.bottom - 5) + ")") 
                   .append("text")
-                  .text("California Air Resources Board; California Department of Finance; US Bureau of Economic Analysis. Graphic by Jeremy Rue for CalMatters.")
+                  .text("Sources: California Air Resources Board; California Department of Finance; US Bureau of Economic Analysis. Graphic by Jeremy Rue for CALMatters.")
                   .style({"font":"8px sans-serif", "fill":"#767676"});
 
                 //headline
@@ -284,6 +304,7 @@
                     .attr("d", this.area(
                         [
                             {year:this.parseDate("2013"), y:lastDataItem.values[lastDataItem.values.length - 1].y0 + lastDataItem.values[lastDataItem.values.length - 1].y, y0:0 },
+                            {year:this.parseDate("2020"), y:43100000, y0:0 },
                             {year:this.parseDate("2030"), y:25900000, y0:0 }
                         ]
                     ))
@@ -296,6 +317,11 @@
                     .duration(800)
                     .attr("cx", function(d){ return _that.xScale(d.year); });
 
+                d3.selectAll("g.annotation")
+                    .transition()
+                    .duration(800)
+                    .attr("transform", "translate(" + this.xScale(this.parseDate("2020")) + "," + this.yScale(43100000) + ")");
+
             },
 
 
@@ -306,7 +332,6 @@
                 this.bars = this.g.selectAll("path")
                     .data(this.stackedData)
                     .enter();
-
 
                 this.bars.append("path")
                     .attr("class", "line")
@@ -324,7 +349,7 @@
                     .attr("class", "greenhouseLine")
                     .datum(this.pop.filter(function(d){ return +d.year > new Date("2013").getTime();}))
                     .attr("d", this.ggLine)
-                    .style({"fill":"none", "stroke":"#211A6E", "stroke-width":"3px", "stroke-dasharray":"5,5", "opacity":0.5});
+                    .style({"fill":"none", "stroke":"#211A6E", "stroke-width":"1px", "stroke-dasharray":"5,5", "opacity":0.5});
 
 
                 //GDP bars at bottom
@@ -352,7 +377,9 @@
 
                         d3.select("#tooltip")
                             .style({"opacity":1, "top": ((_that.margin.top + _that.height + _that.xAxisSpacer + rect.y - 10) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
-                            .html("<strong>California GDP change from " + (d.year.getFullYear() - 1) + " to " + d.year.getFullYear() + ": " + d.GDP + "%</strong>");
+                            .html("<strong>California GDP change from " + (d.year.getFullYear() - 1) + " to " + d.year.getFullYear() + ": " + d.GDP + "%</strong>")
+                            .classed("left", function(){ return _that.pop.indexOf(d) < 4 ? true : false; })
+                            .classed("right", function(){ return _that.pop.indexOf(d) > 10 ? true : false; });
                     })
                     .on("mouseout", function(){
                         d3.select("#tooltip")
@@ -370,6 +397,7 @@
                     .attr("d", this.area(
                         [
                             {year:this.parseDate("2013"), y:lastDataItem.values[lastDataItem.values.length - 1].y0 + lastDataItem.values[lastDataItem.values.length - 1].y, y0:0 },
+                            {year:this.parseDate("2020"), y:43100000, y0:0 },
                             {year:this.parseDate("2030"), y:25900000, y0:0 }
                         ]
                     ))
@@ -412,14 +440,14 @@
 
                         var rect = d3.select(this).node().getBBox();
 
-                        console.log(rect);
-
                         d3.select(this)
                             .style({"cursor":"pointer"});
 
                         d3.select("#tooltip")
                             .style({"opacity":1, "top": ((_that.margin.top + rect.y) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
-                            .html("<strong>California Population:</strong> " + d3.format(",2f")(d.population ));
+                            .html("<strong>California Population:</strong> " + d3.format(",2f")(d.population ))
+                            .classed("left", function(){ return _that.pop.indexOf(d) < 4 ? true : false; })
+                            .classed("right", function(){ return _that.pop.indexOf(d) > 10 ? true : false; });
                         
 
                     })
@@ -429,7 +457,7 @@
                                 .transition()
                                 .duration(400)
                                 .style("opacity", 0);
-                        },1500)
+                        },1000)
                     });
 
                 this.gl.selectAll("circle")
@@ -440,7 +468,6 @@
                     .attr("cx", function(d){ return _that.xScale(d.year); })
                     .attr("cy", function(d){ return _that.yScale(d.greenhouse); })
                     .attr("r", 4)
-                    //.style({"stroke":"#211A6E", "fill":"#fff","fill-opacity":0, "stroke-width":"1px", "cursor":"pointer"})
                     .style({"stroke":"none", "fill":"#211A6E","fill-opacity":1, "stroke-width":"1px", "cursor":"pointer"})
                     .on("mouseover", function(d){
                         
@@ -459,7 +486,9 @@
 
                         d3.select("#tooltip")
                             .style({"opacity":1, "top": ((_that.margin.top + rect.y + 5) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
-                            .html("<strong>Greenhouse Gases:</strong><br>" + d3.format(",0d")(d.greenhouse * 10) + "<br>(millions of tonnes C02)" );
+                            .html("<strong>Greenhouse Gases:</strong><br>" + d3.format(",0d")(d.greenhouse * 10) + "<br>(million tonnes C02e)" )
+                            .classed("left", function(){ return _that.pop.indexOf(d) < 4 ? true : false; })
+                            .classed("right", function(){ return _that.pop.indexOf(d) > 10 ? true : false; });
                         
                     })
                     .on("mouseout", function(){
@@ -468,8 +497,75 @@
                                 .transition()
                                 .duration(400)
                                 .style("opacity", 0);
-                        },1500)
+                        },1000)
                     });
+
+                this.gl.append("circle")
+                    .attr("class", "dot")
+                    .datum({year:_that.parseDate("2020"), greenhouse:43100000})
+                    .attr("cx", function(d){ return _that.xScale(d.year); })
+                    .attr("cy", function(d){ console.log(d);return _that.yScale(d.greenhouse); })
+                    .attr("r", 6)
+                    .style({"stroke":"#000", "stroke-width":"1px", "fill":"#211A6E", "fill-opacity":0.5, "cursor":"pointer"})
+                    .on("mouseover", function(d){
+
+                        // window.clearTimeout(window.timeout);
+
+                        // var h = _that.svg.node().getBoundingClientRect().height,
+                        //     w = _that.svg.node().getBoundingClientRect().width,
+                        // wOffset = w/(_that.width + _that.margin.left + _that.margin.right),
+                        // hOffset = h/(_that.height + _that.margin.top + _that.margin.bottom);
+
+                        // var rect = d3.select(this).node().getBBox();
+
+                        // d3.select(this)
+                        //     .style({"cursor":"pointer"});
+
+                        // d3.select("#tooltip")
+                        //     .style({"opacity":1, "top": ((_that.margin.top + rect.y + 5) * hOffset) + "px", "left": ((_that.margin.left + (rect.x + (rect.width/2))) * wOffset) + "px" })
+                        //     .html("<strong>California Emissions Goal:</strong><br>" + d3.format(",0d")(d.greenhouse * 10) + "<br>(million tonnes C02e) by 2020" )
+                        //     .classed("right", function(){ return true; });
+                    })
+                    .on("mouseout", function(d){
+                        // window.timeout = window.setTimeout(function(){
+                        //     d3.select("#tooltip")
+                        //         .transition()
+                        //         .duration(400)
+                        //         .style("opacity", 0);
+                        // },1000)
+
+                    });
+
+                    var annotation = this.gl.append("g")
+                        .attr("class", "annotation")
+                        .attr("transform", "translate(" + this.xScale(this.parseDate("2020")) + "," + this.yScale(43100000) + ")");
+
+                    annotation.append("line")
+                        .attr("x1", 0)
+                        .attr("y1", 0)
+                        .attr("x2", 0)
+                        .attr("y2", 70)
+                        .style({"stroke":"#000", "stroke-width":"1px"});
+
+                    var annoteText = annotation.append("text")
+                        .attr("x", -45)
+                        .attr("y", 75)
+                        .style({"font":"11px sans-serif"})
+
+                    annoteText.append("tspan")
+                        .attr("x", -45)
+                        .attr("dy", "1.2em")
+                        .text("The 2020 goal")
+
+                    annoteText.append("tspan")
+                        .attr("x", -45)
+                        .attr("dy", "1.2em")
+                        .text("(431 million tonnes CO2e)")
+
+                    // annoteText.append("tspan")
+                    //     .attr("x", -45)
+                    //     .attr("dy", "1.2em")
+                    //     .text("be reached by 2020.")
 
 
                 this.drawLegend(this.data);
@@ -514,12 +610,14 @@
                         }
                     });
 
-                this.g.append("text")
-                    .attr("class", "label")
-                    .attr("x", this.xScale(this.parseDate("2022")))
-                    .attr("y", this.yScale(15000000))
-                    .text("Projected")
-                    .style({"font":"12px sans-serif", "text-anchor":"middle", "font-weight":"bold", "fill":"#aaa", "pointer-events":"none"})
+
+
+                // this.g.append("text")
+                //     .attr("class", "label")
+                //     .attr("x", this.xScale(this.parseDate("2022")))
+                //     .attr("y", this.yScale(15000000))
+                //     .text("Projected")
+                //     .style({"font":"12px sans-serif", "text-anchor":"middle", "font-weight":"bold", "fill":"#ccc", "pointer-events":"none"})
 
                 this.drawButtons();
             },
@@ -534,10 +632,10 @@
                     .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
                 this.buttons.append("rect")
-                    .attr("x", this.width * .75)
-                    .attr("y", 5)
-                    .attr("width", 130)
-                    .attr("height", 30)
+                    .attr("x", this.width * .83)
+                    .attr("y", 8)
+                    .attr("width", 118)
+                    .attr("height", 25)
                     .style({"fill":"#bbb", "stroke-width":"1px", "cursor":"pointer"})
                     .style("stroke", "#777")
                     .on("mouseover", function(){
@@ -557,12 +655,12 @@
                     })
 
                 this.buttons.append("text")
-                    .attr("x", this.width * .75 + 65)
+                    .attr("x", this.width * .82 + 65)
                     .attr("y", 20)
                     .attr("dominant-baseline", "central")
                     .attr("text-anchor", "middle")
-                    .text("Projections to 2030")
-                    .style({"font":"12px sans-serif", "pointer-events":"none"})
+                    .text("Toggle 2030 projection")
+                    .style({"font":"10px sans-serif", "pointer-events":"none"})
 
                 this.svg.append("rect")
                     .attr("class", "blocker")
@@ -575,8 +673,8 @@
 
                 var legends = [
                     {name: "Greenhouse Gas Emissions", x:.02, color:"#211A6E"},
-                    {name: "Population", x:.31, color:"#942911"},
-                    {name: "Economic Growth", x:.44, color:"#DC9C89"}
+                    {name: "Population", x:.35, color:"#942911"},
+                    {name: "Economic Growth", x:.55, color:"#DC9C89"}
                 ];
 
                 var legend = this.svg.append("g")
